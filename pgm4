@@ -1,0 +1,28 @@
+pipeline {
+    agent any
+    tools { maven 'Maven3' } // Use the Maven tool you set up
+
+    stages {
+        stage('Build & Test') {
+            steps {
+                dir('demo3') { // Go to your project folder
+                    bat 'mvn clean install'
+                }
+            }
+        }
+    }
+
+    // This is the "Notification" part
+    post {
+        always {
+            // Sends a simple message to your Slack channel
+            slackSend channel: '#jenkins-slack', 
+                      message: "Build Result: ${currentBuild.currentResult}"
+            
+            // Sends a simple email
+            mail to: 'your-email@example.com',
+                 subject: "Jenkins Build ${currentBuild.currentResult}",
+                 body: "Check your build here: ${env.BUILD_URL}"
+        }
+    }
+}
